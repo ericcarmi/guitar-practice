@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import tunings from './tunings.json';
+import Tunings from './tunings.json';
 
 
 const Modes = {
@@ -18,6 +18,8 @@ const Modes = {
 function loadTunings() {
 	
 }
+
+const goldenRatio = (1 + Math.sqrt(5)) / 2.0;
 
 /*
 
@@ -56,7 +58,6 @@ const minNumberOfFrets = 2;
 export const Fretboard = () => {
 
 	function getNextNote(x: string){
-		console.log(tunings)
 		return Notes[(NoteNumber[x as keyof typeof NoteNumber] + 1) % 12]		
 	}
 
@@ -69,9 +70,10 @@ export const Fretboard = () => {
 	const [numFrets, setNumFrets] = useState(15);
 	const [numStrings, setNumStrings] = useState(strings.length);
 
-	const [fretSize, setFretSize] = useState({ width: 70, height: 40 })
+	const [fretSize, setFretSize] = useState({ width: 70, height: 70 / goldenRatio  })
 	const [currentMode, setCurrentMode] = useState<keyof typeof Modes >('major');
 	const [currentRoot, setCurrentRoot] = useState<keyof typeof NoteNumber>('e');
+	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard');
 	const [fretOffColor, setFretOffColor] = useState('rgb(90,90,90)');
 	const [fretOnColor, setFretOnColor] = useState('rgb(190,0,0)');
 
@@ -129,6 +131,19 @@ export const Fretboard = () => {
 				onChange={(e) => setCurrentMode(e.target.value as keyof typeof Modes )}
 				>
 				{Object.keys(Modes).map((itm:any) => {
+					return <option key={itm}>{itm}</option>
+				})}
+
+			</Dropdown>
+
+			<Dropdown
+				value={currentTuning}
+				onChange={(e) => {
+						setCurrentTuning(e.target.value as keyof typeof Tunings);
+						setStrings(Tunings[e.target.value as keyof typeof Tunings].map((i) => i as GuitarString));
+					}}
+				>
+				{Object.keys(Tunings).map((itm:any) => {
 					return <option key={itm}>{itm}</option>
 				})}
 
@@ -223,7 +238,7 @@ position: absolute;
 color: white;
 cursor: pointer;
 font-size: 20px;
-line-height: 2em;
+line-height: calc(70px / ${goldenRatio});
 vertical-align: middle;
 
 	&:hover {
