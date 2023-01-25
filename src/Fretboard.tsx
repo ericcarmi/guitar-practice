@@ -3,6 +3,17 @@ import styled from 'styled-components';
 
 
 
+const Modes = {
+	lydian : [0, 2, 4, 6, 7, 9, 11],
+	major : [0, 2, 4, 5, 7, 9, 11],
+	ionian : [0, 2, 4, 5, 7, 9, 11],
+	mixolydian : [0, 2, 4, 5, 7, 9, 10],
+	dorian : [0, 2, 3, 5, 7, 9, 10],
+	minor : [0, 2, 3, 5, 7, 8, 10],
+	aeolian : [0, 2, 3, 5, 7, 8, 10],
+	phyrgian : [0, 1, 3, 5, 7, 8, 10],
+	locrian : [0, 1, 3, 4, 7, 8, 10],
+}
 
 
 /*
@@ -55,6 +66,19 @@ export const Fretboard = () => {
 	const [numStrings, setNumStrings] = useState(strings.length);
 
 	const [fretSize, setFretSize] = useState({ width: 70, height: 40 })
+	const [currentMode, setCurrentMode] = useState<keyof typeof Modes >('major');
+	const [currentRoot, setCurrentRoot] = useState<keyof typeof NoteNumber>('e');
+
+	function getNotesFromMode() {
+		let x = [];
+		const offset = NoteNumber[currentRoot];
+		for(let i in Modes [currentMode]){
+			x.push(Notes[(Modes [currentMode][i] + offset) % 12]);
+		}
+		return x;
+	}
+
+	const notes = getNotesFromMode();
 
 	return (
 		<>
@@ -89,6 +113,16 @@ export const Fretboard = () => {
 				F+
 			</Button>
 
+			<Dropdown
+				value={currentMode}
+				onChange={(e) => setCurrentMode(e.target.value as keyof typeof Modes )}
+				>
+				{Object.keys(Modes).map((itm:any) => {
+					return <option>{itm}</option>
+				})}
+
+			</Dropdown>
+
 			
 			<div style={{ position: 'absolute', top: '10%', left: '4%' }}>
 				{strings.map((itm, idx) => {
@@ -112,7 +146,10 @@ export const Fretboard = () => {
 						a.push(
 							<Fret key={(i + idx*numStrings)} style={{
 								left: fretSize.width * i,
-								top: fretSize.height * idx, width: fretSize.width, height: fretSize.height
+								top: fretSize.height * idx, 
+								width: fretSize.width, 
+								height: fretSize.height,
+								background: notes.includes(Notes[(i + NoteNumber[itm.note as keyof typeof NoteNumber]) % 12]) ? 'rgb(190,150,50)' : '',
 							}}>
 								{Notes[(i + NoteNumber[itm.note as keyof typeof NoteNumber]) % 12]}
 							</Fret>
@@ -234,6 +271,31 @@ cursor:pointer;
 		background: rgb(0,210,30);		
 	}
 
+
+`
+
+const Dropdown = styled.select`
+background: rgb(90,90,0);
+text-align: center;
+justify-content: center;
+align-content: center;
+position: absolute;
+color: white;
+cursor: pointer;
+font-size: 18px;
+line-height: 2em;
+vertical-align: middle;
+left: calc(4% + 180px);
+top: calc(10% - 28px);
+height: 24px;
+
+
+	&:hover {
+		background: rgb(130,130,130);		
+	}
+	&:active {
+		background: rgb(170,170,170);		
+	}
 
 `
 
