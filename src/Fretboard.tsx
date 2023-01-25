@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-
+import tunings from './tunings.json';
 
 
 const Modes = {
@@ -15,6 +15,9 @@ const Modes = {
 	locrian : [0, 1, 3, 4, 7, 8, 10],
 }
 
+function loadTunings() {
+	
+}
 
 /*
 
@@ -53,6 +56,7 @@ const minNumberOfFrets = 2;
 export const Fretboard = () => {
 
 	function getNextNote(x: string){
+		console.log(tunings)
 		return Notes[(NoteNumber[x as keyof typeof NoteNumber] + 1) % 12]		
 	}
 
@@ -68,12 +72,14 @@ export const Fretboard = () => {
 	const [fretSize, setFretSize] = useState({ width: 70, height: 40 })
 	const [currentMode, setCurrentMode] = useState<keyof typeof Modes >('major');
 	const [currentRoot, setCurrentRoot] = useState<keyof typeof NoteNumber>('e');
+	const [fretOffColor, setFretOffColor] = useState('rgb(90,90,90)');
+	const [fretOnColor, setFretOnColor] = useState('rgb(190,0,0)');
 
 	function getNotesFromMode() {
 		let x = [];
 		const offset = NoteNumber[currentRoot];
-		for(let i in Modes [currentMode]){
-			x.push(Notes[(Modes [currentMode][i] + offset) % 12]);
+		for(let i in Modes[currentMode]){
+			x.push(Notes[(Modes[currentMode][i] + offset) % 12]);
 		}
 		return x;
 	}
@@ -82,7 +88,9 @@ export const Fretboard = () => {
 
 	return (
 		<>
-			<Button style={{ top: 'calc(10% - 25px)', left: '4%', }}
+			<Header>
+			<Button 
+				key={'s-'} 				
 				onClick={() => {
 					if (numStrings > minNumberOfStrings) {
 						setNumStrings((prev) => prev - 1);
@@ -92,7 +100,8 @@ export const Fretboard = () => {
 			>
 				S-
 			</Button>
-			<Button style={{ top: 'calc(10% - 25px)', left: 'calc(4% + 45px)', }}
+			<Button 
+				key={'s+'} 
 				onClick={() => {
 					if (numStrings < maxNumberOfStrings) {
 						setNumStrings((prev) => prev + 1);
@@ -102,12 +111,14 @@ export const Fretboard = () => {
 			>
 				S+
 			</Button>
-			<Button style={{ top: 'calc(10% - 25px)', left: 'calc(4% + 90px)', }}
+			<Button 
+				key={'f-'} 
 				onClick={() => setNumFrets((prev) => Math.max(prev - 1, minNumberOfFrets))}
 			>
 				F-
 			</Button>
-			<Button style={{ top: 'calc(10% - 25px)', left: 'calc(4% + 135px)', }}
+			<Button 
+				key={'f+'}
 				onClick={() => setNumFrets((prev) => Math.min(prev + 1, maxNumberOfFrets))}
 			>
 				F+
@@ -118,38 +129,41 @@ export const Fretboard = () => {
 				onChange={(e) => setCurrentMode(e.target.value as keyof typeof Modes )}
 				>
 				{Object.keys(Modes).map((itm:any) => {
-					return <option>{itm}</option>
+					return <option key={itm}>{itm}</option>
 				})}
 
 			</Dropdown>
+
+
+			</Header>
 
 			
 			<div style={{ position: 'absolute', top: '10%', left: '4%' }}>
 				{strings.map((itm, idx) => {
 					let a: any = []
-					a.push(<>
-						<TuneDownButton style={{top: fretSize.height * idx + 10}}
+					a.push(<div key={'t' + idx}>
+						<TuneDownButton key={'t1' + idx} style={{top: fretSize.height * idx + 10}}
 							onClick={() => {
 								setStrings((prev) => prev.map((i) => i !== itm ? i : {note:getPrevNote(itm.note), position:itm.position, octave: itm.octave}))
 							}}
 							>-</TuneDownButton>
-						<TuneUpButton style={{top: fretSize.height * idx + 10}}
+						<TuneUpButton key={'t2' + idx} style={{top: fretSize.height * idx + 10}}
 							onClick={() => {
 								setStrings((prev) => prev.map((i) => i !== itm ? i : {note:getNextNote(itm.note), position:itm.position, octave: itm.octave}))
 							}}
 							>+</TuneUpButton>
-					</>
+					</div>
 
 					)
 
 					for (let i = 0; i < numFrets; i++) {
 						a.push(
-							<Fret key={(i + idx*numStrings)} style={{
+							<Fret key={'f' + (i + idx*numStrings)} style={{
 								left: fretSize.width * i,
 								top: fretSize.height * idx, 
 								width: fretSize.width, 
 								height: fretSize.height,
-								background: notes.includes(Notes[(i + NoteNumber[itm.note as keyof typeof NoteNumber]) % 12]) ? 'rgb(190,150,50)' : '',
+								background: notes.includes(Notes[(i + NoteNumber[itm.note as keyof typeof NoteNumber]) % 12]) ? fretOnColor : fretOffColor,
 							}}>
 								{Notes[(i + NoteNumber[itm.note as keyof typeof NoteNumber]) % 12]}
 							</Fret>
@@ -160,13 +174,14 @@ export const Fretboard = () => {
 					if (idx === numStrings - 1) {
 						for (let i = 0; i < numFrets; i++) {
 							a.push(
-								<FretNumber key={i} style={{
-									left: fretSize.width * i,
-									top: 5 + fretSize.height * numStrings,
-									width: fretSize.width,
-									height: fretSize.height,
-								}}>
-									{i}
+								<FretNumber key={'n' + i+numStrings} 
+									style={{
+										left: fretSize.width * i,
+										top: 5 + fretSize.height * numStrings,
+										width: fretSize.width,
+										height: fretSize.height,
+									}}>
+										{i}
 								</FretNumber>)
 
 
@@ -184,8 +199,22 @@ export const Fretboard = () => {
 }
 
 
+const Header = styled.div((props) => {
+	return {
+		position: 'absolute',
+		width: '100%',
+		height: 50,
+		background: 'linear-gradient(rgb(100,0,100), rgb(70,0,80))',
+		textAlign: 'center',
+		display: 'flex',
+		alignContent: 'center',
+		gap: '0px 5px',
+		
+	}
+})
+
 const Fret = styled.div`
-background: rgb(90,90,90);
+// background: rgb(90,90,90);
 text-align: center;
 justify-content: center;
 align-content: center;
@@ -198,10 +227,10 @@ line-height: 2em;
 vertical-align: middle;
 
 	&:hover {
-		background: rgb(130,130,130);		
+		filter: contrast(150%);		
 	}
 	&:active {
-		background: rgb(170,170,170);		
+		filter: contrast(200%);		
 	}
 `
 
@@ -221,10 +250,12 @@ vertical-align: middle;
 const Button = styled.div`
 background: rgb(0,150,30);
 width: 40px;
-height: 20px;
-position: absolute;
+height: 50px;
 text-align: center;
+flex-direction: row;
 cursor: pointer;
+font-size: 20px;
+line-height: 50px;
 
 	&:hover {
 		background: rgb(0,180,30);		
@@ -275,19 +306,16 @@ cursor:pointer;
 `
 
 const Dropdown = styled.select`
-background: rgb(90,90,0);
+background: rgb(90,90,90);
 text-align: center;
 justify-content: center;
 align-content: center;
-position: absolute;
 color: white;
+display: flex;
 cursor: pointer;
 font-size: 18px;
 line-height: 2em;
 vertical-align: middle;
-left: calc(4% + 180px);
-top: calc(10% - 28px);
-height: 24px;
 
 
 	&:hover {
