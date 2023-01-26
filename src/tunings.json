@@ -35,5 +35,15 @@
 		{"note": "e", "octave": "2", "position": 5},
 		{"note": "b", "octave": "1", "position": 6},
 		{"note": "e", "octave": "1", "position": 7}
+	],
+	"8new" : [
+		{"note": "g", "octave": "4", "position": 0},
+		{"note": "e", "octave": "4", "position": 1},
+		{"note": "d", "octave": "4", "position": 2},
+		{"note": "a", "octave": "3", "position": 3},
+		{"note": "d", "octave": "3", "position": 4},
+		{"note": "g", "octave": "2", "position": 5},
+		{"note": "c", "octave": "2", "position": 6},
+		{"note": "g", "octave": "1", "position": 7}
 	]
 }

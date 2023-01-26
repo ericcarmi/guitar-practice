@@ -7,6 +7,8 @@ export const minNumberOfStrings = 4;
 export const maxNumberOfFrets = 24;
 export const minNumberOfFrets = 2;
 
+export type NOTE = keyof typeof NoteNumber;
+export type GuitarString = { note: string, position: number, octave: string };
 
 export const Groups = {
 	'western 7' : {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Tunings from './tunings.json';
 import { goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings, 
-	maxNumberOfFrets, minNumberOfFrets, allModes,
+	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE,
 } from './const';
 
 const Modes = {
@@ -17,10 +17,23 @@ const Modes = {
 	locrian: [0, 1, 3, 4, 7, 8, 10],
 }
 
+const context = new AudioContext(); //allows access to webaudioapi
+const osc = document.querySelector('#osc'); //grabs the button
 
-type GuitarString = { note: string, position: number, octave: string };
+const oscillator = context.createOscillator(); //creates oscillator
 
 export const Fretboard = () => {
+
+const onmousedown = (freq: number) => {
+  // let oscPitch = document?.querySelector('#oscPitch')?.value; //assigning the value of the slider to a variable
+oscillator.type = "sine"; //chooses the type of wave
+oscillator.frequency.value = freq; //assigning the value of oscPitch to the oscillators frequency value
+oscillator.connect(context.destination); //sends to output
+oscillator.start(context.currentTime) //starts the sound at the current time
+}
+const onmouseup = () => {
+  oscillator.disconnect() //disconnects the oscillator
+}
 
 	function getNextNote(x: string) {
 		return Notes[(NoteNumber[x as keyof typeof NoteNumber] + 1) % 12]
@@ -36,7 +49,7 @@ export const Fretboard = () => {
 	const [fretSize, setFretSize] = useState({ width: 70, height: 70 / goldenRatio })
 	const [currentGroup, setCurrentGroup] = useState<keyof typeof Groups>('western 7');
 	const [currentMode, setCurrentMode] = useState<keyof Object>('lydian' as keyof Object);
-	const [currentRoot, setCurrentRoot] = useState<keyof typeof NoteNumber>('e');
+	const [currentRoot, setCurrentRoot] = useState<NOTE>('e');
 	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard8');
 	const [fretOffColor, setFretOffColor] = useState('rgb(90,90,90)');
 	const [fretOnColor, setFretOnColor] = useState('rgb(190,0,0)');
@@ -113,6 +126,19 @@ export const Fretboard = () => {
 				</Dropdown>
 
 				<Dropdown
+					value={currentRoot}
+					onChange={(e) => {
+						setCurrentRoot(e.target.value as NOTE)
+					}}
+				>
+					{Notes.map((itm: any) => {
+						return <option key={itm}>{itm}</option>
+					})}
+
+				</Dropdown>
+
+
+				<Dropdown
 					value={currentMode}
 					onChange={(e) => setCurrentMode(e.target.value as keyof Object)}
 				>
@@ -161,7 +187,10 @@ export const Fretboard = () => {
 
 					for (let i = 0; i < numFrets; i++) {
 						a.push(
-							<Fret key={'f' + (i + idx * numStrings)} style={{
+							<Fret key={'f' + (i + idx * numStrings)} 
+								onMouseDown={() => onmousedown && onmousedown(110 * Math.pow(2,i/12))}
+								onMouseUp={() => onmouseup && onmouseup()}
+								style={{
 								left: fretSize.width * i,
 								top: fretSize.height * idx,
 								width: fretSize.width,
