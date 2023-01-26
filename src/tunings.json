@@ -1,5 +1,22 @@
 {
-	"standard" : [
+	"standard6" : [
+		{"note": "e", "octave": "4", "position": 0},
+		{"note": "b", "octave": "3", "position": 1},
+		{"note": "g", "octave": "3", "position": 2},
+		{"note": "d", "octave": "3", "position": 3},
+		{"note": "a", "octave": "2", "position": 4},
+		{"note": "e", "octave": "2", "position": 5}
+	],
+	"standard7" : [
+		{"note": "e", "octave": "4", "position": 0},
+		{"note": "b", "octave": "3", "position": 1},
+		{"note": "g", "octave": "3", "position": 2},
+		{"note": "d", "octave": "3", "position": 3},
+		{"note": "a", "octave": "2", "position": 4},
+		{"note": "e", "octave": "2", "position": 5},
+		{"note": "b", "octave": "1", "position": 6}
+	],
+	"standard8" : [
 		{"note": "e", "octave": "4", "position": 0},
 		{"note": "b", "octave": "3", "position": 1},
 		{"note": "g", "octave": "3", "position": 2},
