@@ -44,8 +44,8 @@ export const Fretboard = ({
 	const [currentMode, setCurrentMode] = useState<MODE>('lydian' as MODE);
 	const [currentRoot, setCurrentRoot] = useState<NOTE>('e');
 	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard8');
-	const [fretOffColor, setFretOffColor] = useState('rgb(90,90,90)');
-	const [fretOnColor, setFretOnColor] = useState('rgb(190,0,0)');
+	const [fretOffColor, setFretOffColor] = useState('radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30))');
+	const [fretOnColor, setFretOnColor] = useState('radial-gradient(ellipse at center, rgb(190,0,0), rgb(30,30,30))');
 
 	const [shouldOnlyPlayInMode,setShouldOnlyPlayInMode] = useState(true);
 
@@ -216,12 +216,12 @@ export const Fretboard = ({
 				{strings.map((itm, idx) => {
 					let a: any = []
 					a.push(<div key={'t' + idx}>
-						<TuneDownButton key={'t1' + idx} style={{ top: fretSize.height * idx + 10 }}
+						<TuneDownButton key={'t1' + idx} style={{ top: fretSize.height * idx + 22 }}
 							onClick={() => {
 								setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getPrevNote(itm.note), position: itm.position, octave: itm.octave }))
 							}}
 						>-</TuneDownButton>
-						<TuneUpButton key={'t2' + idx} style={{ top: fretSize.height * idx + 10 }}
+						<TuneUpButton key={'t2' + idx} style={{ top: fretSize.height * idx + 2 }}
 							onClick={() => {
 								setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getNextNote(itm.note), position: itm.position, octave: itm.octave }))
 							}}
@@ -294,7 +294,7 @@ const ToggleButton = styled.input((props) => {
 })
 const ToggleLabel = styled.span((props) => {
 	return {
-		color: 'white',
+		color: 'rgb(125,50,20)',
 	}
 })
 
@@ -304,7 +304,7 @@ const Header = styled.div((props) => {
 		position: 'absolute',
 		width: '100%',
 		height: 50,
-		background: 'linear-gradient(rgb(100,0,100), rgb(70,0,80))',
+		background: 'radial-gradient(ellipse at center, rgb(100,100,100), rgb(170,170,170))',
 		textAlign: 'center',
 		verticalAlign: 'center',
 		lineHeight: '50px',
@@ -327,12 +327,13 @@ cursor: pointer;
 font-size: 20px;
 line-height: calc(70px / ${goldenRatio});
 vertical-align: middle;
+transition: filter 0.1s;
 
 	&:hover {
-		filter: contrast(150%);		
+		filter: contrast(120%);		
 	}
 	&:active {
-		filter: contrast(200%);		
+		filter: contrast(150%);		
 	}
 `
 
@@ -347,84 +348,97 @@ color: white;
 font-size: 20px;
 line-height: 2em;
 vertical-align: middle;
+background: radial-gradient(ellipse at center, rgb(70,70,70), rgb(10,10,10));
 `
 
+// for string +/- and fret +/-
 const Button = styled.div`
-background: rgb(0,150,30);
+background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
 width: 40px;
-height: 50px;
 text-align: center;
 flex-direction: row;
 cursor: pointer;
 font-size: 20px;
 line-height: 50px;
+transition: filter 0.2s;
+color: rgb(230,200,200);
 
 	&:hover {
-		background: rgb(0,180,30);		
+		filter: contrast(120%);		
 	}
 	&:active {
-		background: rgb(0,210,30);		
+		filter: contrast(150%);		
 	}
+
+
 
 `
 
 const TuneDownButton = styled.div`
-background: rgb(0,150,30);
+background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
 color: black;
 text-align: center;
 position: absolute;
-left: -62px;
+left: -33px;
+color: rgb(230,200,200);
 width: 30px;
-height: 20px;
+height: 18px;
+margin-top: 2px;
 cursor:pointer;
+transition: filter 0.2s;
+
 
 	&:hover {
-		background: rgb(0,180,30);		
+		filter: contrast(120%);		
 	}
 	&:active {
-		background: rgb(0,210,30);		
+		filter: contrast(150%);		
 	}
 
 `
 
 const TuneUpButton = styled.div`
-background: rgb(0,150,30);
+background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
 color: black;
 text-align: center;
 position: absolute;
-left: -30px;
-width: 25px;
-height: 20px;
+color: rgb(230,200,200);
+left: -33px;
+width: 30px;
+height: 18px;
+margin-bottom: 2px;
 cursor:pointer;
+transition: filter 0.2s;
+
 
 	&:hover {
-		background: rgb(0,180,30);		
+		filter: contrast(120%);		
 	}
 	&:active {
-		background: rgb(0,210,30);		
+		filter: contrast(150%);		
 	}
 
 
 `
 
 const Dropdown = styled.select`
-background: rgb(90,90,90);
+background: radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30));
 text-align: center;
 justify-content: center;
 align-content: center;
-color: white;
+color: rgb(230,200,200);
 display: flex;
 cursor: pointer;
 font-size: 18px;
 line-height: 2em;
 vertical-align: middle;
-
+transition: filter 0.2s;
 
 	&:hover {
-		background: rgb(130,130,130);		
+		filter: contrast(120%);		
 	}
 	&:active {
-		background: rgb(170,170,170);		
+		filter: contrast(150%);		
 	}
 
 `
