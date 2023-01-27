@@ -15,10 +15,12 @@ interface IFretboard {
 }
 
 
+type synthType = Tone.Synth | Tone.FMSynth | Tone.AMSynth | Tone.PolySynth;
+
 export const Fretboard = ({
 	isMouseDown,
 } : IFretboard) => {
-	const synth = new Tone.Synth().toDestination();
+	const [synth, setSynth] = useState<synthType>(new Tone.AMSynth().toDestination());
 
 	const playTone = (freq: number) => {
 		synth.triggerAttackRelease(freq,  "32n");
@@ -165,6 +167,35 @@ export const Fretboard = ({
 					}}
 				>
 					{Object.keys(Groups).map((itm: any) => {
+						return <option key={itm}>{itm}</option>
+					})}
+
+				</Dropdown>
+
+				<Dropdown
+					value={synth.name}
+					onChange={(e) => {
+						switch(e.target.value) {
+							case "AMSynth" : {
+							setSynth(new Tone.AMSynth().toDestination());
+							break;
+						}
+							case "FMSynth" : {
+							setSynth(new Tone.FMSynth().toDestination());
+							break;
+						}
+							case "PolySynth" : {
+							setSynth(new Tone.PolySynth().toDestination());
+							break;
+						}
+							case "Synth" : {
+							setSynth(new Tone.Synth().toDestination());
+							break;
+						}
+					}
+					}}
+				>
+					{Object(['AMSynth', 'FMSynth', 'PolySynth', 'Synth']).map((itm: any) => {
 						return <option key={itm}>{itm}</option>
 					})}
 
