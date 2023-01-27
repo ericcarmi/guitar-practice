@@ -1,11 +1,15 @@
+import {useState, useEffect, useRef} from 'react';
 import {Fretboard} from './Fretboard';
-import {useState, useEffect} from 'react';
+import useScript from './hooks/useScript';
 
+import * as Tone from 'tone'
 
 function App() {
 
   const [isMouseDown, setIsMouseDown] = useState(false);
 
+	// const audioContext = useRef(new AudioContext());
+	// const oscillator = audioContext.current.createOscillator();
   
   
   return (
@@ -17,12 +21,12 @@ function App() {
         height: '100%', 
         position: 'absolute'
       }}
-      onMouseDown={() => setIsMouseDown(true)}
+      onMouseDown={() => {Tone.start(); setIsMouseDown(true)}}
       onMouseUp={() => setIsMouseDown(false)}
+    
       >
     <Fretboard
-    isMouseDown={isMouseDown}
-    setIsMouseDown={setIsMouseDown}
+      isMouseDown={isMouseDown}
     />
     </div>
   );

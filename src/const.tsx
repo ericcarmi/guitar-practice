@@ -52,3 +52,24 @@ export type allModes =
 // 	console.log(i);
 // }
 // console.log( x)
+
+
+
+
+// export default function useAudio(soundPath) {
+//   const audioRef = useRef<BaseAudioContext>(null);
+
+//   useEffect(() => {
+//     if (!hasInteracted) {
+//       return;
+//     }
+
+//     let audio = new AudioContext();
+//     // audioRef.current = audio;
+
+//     return () => audio.close() ;
+//   }, [ hasInteracted, soundPath ]);
+
+//   return () => audioRef.current?.play();
+// }
+

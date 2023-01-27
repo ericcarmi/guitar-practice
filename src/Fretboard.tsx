@@ -1,45 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { Howl } from 'howler';
 import Tunings from './tunings.json';
 import { goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings, 
 	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE, MODE,
 } from './const';
 
+import * as Tone from 'tone'
+
+
 
 interface IFretboard {
 	isMouseDown: boolean;
-	setIsMouseDown: (val: boolean) => void;
 }
 
-// having this inside the fretboard made it never stop sooo...probably should go in _app
-	const audioContext = new AudioContext();
-	const oscillator = audioContext.createOscillator();
 
-export const Fretboard = ({isMouseDown, setIsMouseDown} : IFretboard) => {
+export const Fretboard = ({
+	isMouseDown,
+} : IFretboard) => {
+	const synth = new Tone.Synth().toDestination();
 
 	const playTone = (freq: number) => {
-	  // let oscPitch = document?.querySelector('#oscPitch')?.value; //assigning the value of the slider to a variable
+		synth.triggerAttackRelease(freq,  "32n");
 
-		oscillator.connect(audioContext.destination); //sends to output
-		oscillator.type = "sine"; //chooses the type of wave
-		oscillator.frequency.value = freq; //assigning the value of oscPitch to the oscillators frequency value
-		try {
-			oscillator.start(audioContext.currentTime) //starts the sound at the current time
-			// oscillator.stop(audioContext.current.currentTime + 1) //starts the sound at the current time
-		  // oscillator.disconnect() //disconnects the oscillator
-		}
-		catch(e) {
-			// console.log(e)
-		}
-	}
-	const stopTone = () => {
-		try {
-		  oscillator.disconnect() //disconnects the oscillator
-		}
-		catch(e) {
-			console.log(e)
-		}
-		// oscillator.stop(0.1);
 	}
 
 	function getNextNote(x: string) {
@@ -54,6 +37,7 @@ export const Fretboard = ({isMouseDown, setIsMouseDown} : IFretboard) => {
 	const [numFrets, setNumFrets] = useState(22);
 
 	const [fretSize, setFretSize] = useState({ width: 70, height: 70 / goldenRatio })
+
 	const [currentGroup, setCurrentGroup] = useState<keyof typeof Groups>('western 7');
 	const [currentMode, setCurrentMode] = useState<MODE>('lydian' as MODE);
 	const [currentRoot, setCurrentRoot] = useState<NOTE>('e');
@@ -77,19 +61,7 @@ export const Fretboard = ({isMouseDown, setIsMouseDown} : IFretboard) => {
 
 	const notes = getNotesFromMode();
 
-
-  // useEffect(() => {
-  //   const t = setInterval(() => {
-  //     console.log(isMouseDown)
-  //   },100);
-  //   return () => clearInterval(t);
-  // },[isMouseDown])
-
-	useEffect(() => {
-		if(!isMouseDown) {
-			stopTone();
-		}
-	},[isMouseDown, ])
+	const [interacted, setInteracted] = useState(false);
 
 
 	// useEffect(() => {
@@ -232,15 +204,12 @@ export const Fretboard = ({isMouseDown, setIsMouseDown} : IFretboard) => {
 							<Fret key={'f' + (i + idx * numStrings)} 
 								onMouseEnter={() =>  {
 									if(isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
-										stopTone()
 										playTone(27.5 * Math.pow(2,Number(itm.octave)) * Math.pow(2,(i + NoteNumber[itm.note as NOTE]) / 12))}
 									}
 								}
 								onMouseDown={() =>  {
-									stopTone();
 									playTone(27.5 * Math.pow(2,Number(itm.octave)) * Math.pow(2,(i + NoteNumber[itm.note as NOTE]) / 12))}
 								}
-								onMouseLeave={() => {stopTone()}}
 								style={{
 								left: fretSize.width * i,
 								top: fretSize.height * idx,
