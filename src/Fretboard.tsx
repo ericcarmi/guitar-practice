@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Howl } from 'howler';
 import Tunings from './tunings.json';
-import { goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings, 
+import {
+	goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings,
 	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE, MODE,
 } from './const';
 
@@ -19,11 +20,11 @@ type synthType = Tone.Synth | Tone.FMSynth | Tone.AMSynth | Tone.PolySynth;
 
 export const Fretboard = ({
 	isMouseDown,
-} : IFretboard) => {
+}: IFretboard) => {
 	const [synth, setSynth] = useState<synthType>(new Tone.AMSynth().toDestination());
 
 	const playTone = (freq: number) => {
-		synth.triggerAttackRelease(freq,  "32n");
+		synth.triggerAttackRelease(freq, "32n");
 
 	}
 
@@ -45,26 +46,27 @@ export const Fretboard = ({
 	const [currentRoot, setCurrentRoot] = useState<NOTE>('e');
 	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard8');
 	const [fretOffColor, setFretOffColor] = useState('radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30))');
-	const [fretOnColor, setFretOnColor] = useState('radial-gradient(ellipse at center, rgb(190,0,0), rgb(30,30,30))');
+	const [fretOnColor, setFretOnColor] = useState('radial-gradient(ellipse at center, rgb(0,0,190), rgb(30,30,30))');
 
-	const [shouldOnlyPlayInMode,setShouldOnlyPlayInMode] = useState(true);
+	const [shouldOnlyPlayInMode, setShouldOnlyPlayInMode] = useState(true);
+
+	const [notesForLoop, setNotesForLoop] = useState<Array<number>>([]);
+	const [selectedFrets, setSelectedFrets] = useState<Array<number>>([]);
 
 	const [strings, setStrings] = useState<Array<GuitarString>>(Tunings[currentTuning])
 	const [numStrings, setNumStrings] = useState(Tunings[currentTuning].length);
 
+
 	function getNotesFromMode() {
 		let x = [];
 		const offset = NoteNumber[currentRoot];
-		for (let i in Groups[currentGroup][currentMode] ) {
-			x.push(Notes[( Number(Groups[currentGroup][currentMode][i as MODE]) + offset) % 12]);
+		for (let i in Groups[currentGroup][currentMode]) {
+			x.push(Notes[(Number(Groups[currentGroup][currentMode][i as MODE]) + offset) % 12]);
 		}
 		return x;
 	}
 
 	const notes = getNotesFromMode();
-
-	const [interacted, setInteracted] = useState(false);
-
 
 	// useEffect(() => {
 	// 	const timeout = setTimeout(() => {
@@ -73,9 +75,42 @@ export const Fretboard = ({
 	// 	return () => clearTimeout(timeout);
 	// },[playTone, oscillator])
 
-	function isInMode(i: number, itm: GuitarString){
+	function isInMode(i: number, itm: GuitarString) {
 		return notes.includes(Notes[(i + NoteNumber[itm.note as NOTE]) % 12])
 	}
+
+
+	function clickFretNumber(fret: number) {
+		let x: Array<number> = [];
+		strings.map((itm, idx) => {
+			x.push(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (fret + NoteNumber[itm.note as NOTE]) / 12));
+		})
+		const seq = new Tone.Sequence((time, note) => {
+			synth.triggerAttackRelease(note, 0.1, time);
+			// subdivisions are given as subarrays
+		}, x);
+
+		seq.start(seq.now() + 0);
+		seq.stop(seq.now() + 2);
+
+		Tone.Transport.start();
+	}
+
+	function startLoop() {
+		const seq = new Tone.Sequence((time, note) => {
+			synth.triggerAttackRelease(note, 0.01, time);
+			// subdivisions are given as subarrays
+		}, notesForLoop).start(0);
+		Tone.Transport.bpm.value = 300;
+		Tone.Transport.start();
+	}
+
+	// useEffect(() => {
+	// 	const timeout = setTimeout(() => {
+	// 		// clickFretNumber()
+	// 	},100);
+	// 	return () => clearTimeout(timeout);
+	// },[])
 
 	return (
 		<>
@@ -97,7 +132,7 @@ export const Fretboard = ({
 						if (numStrings < maxNumberOfStrings) {
 							setNumStrings((prev) => prev + 1);
 							setStrings((prev) =>
-								Tunings[currentTuning][numStrings ] !== undefined ?
+								Tunings[currentTuning][numStrings] !== undefined ?
 									prev.concat(Tunings[currentTuning][numStrings])
 									: prev.concat({ note: Notes[(NoteNumber[strings.slice(-1)[0].note as NOTE] + 5) % 12], position: numStrings + 1, octave: strings.slice(-1)[0].octave }));
 						}
@@ -175,24 +210,24 @@ export const Fretboard = ({
 				<Dropdown
 					value={synth.name}
 					onChange={(e) => {
-						switch(e.target.value) {
-							case "AMSynth" : {
-							setSynth(new Tone.AMSynth().toDestination());
-							break;
+						switch (e.target.value) {
+							case "AMSynth": {
+								setSynth(new Tone.AMSynth().toDestination());
+								break;
+							}
+							case "FMSynth": {
+								setSynth(new Tone.FMSynth().toDestination());
+								break;
+							}
+							case "PolySynth": {
+								setSynth(new Tone.PolySynth().toDestination());
+								break;
+							}
+							case "Synth": {
+								setSynth(new Tone.Synth().toDestination());
+								break;
+							}
 						}
-							case "FMSynth" : {
-							setSynth(new Tone.FMSynth().toDestination());
-							break;
-						}
-							case "PolySynth" : {
-							setSynth(new Tone.PolySynth().toDestination());
-							break;
-						}
-							case "Synth" : {
-							setSynth(new Tone.Synth().toDestination());
-							break;
-						}
-					}
 					}}
 				>
 					{Object(['AMSynth', 'FMSynth', 'PolySynth', 'Synth']).map((itm: any) => {
@@ -201,12 +236,28 @@ export const Fretboard = ({
 
 				</Dropdown>
 
-				<ToggleButton 
-					type="checkbox" 
+				<ToggleButton
+					type="checkbox"
 					onChange={() => setShouldOnlyPlayInMode(prev => !prev)}
 					checked={shouldOnlyPlayInMode}
-					/>
-					<ToggleLabel>only play in mode </ToggleLabel>
+				/>
+				<ToggleLabel>only play in mode </ToggleLabel>
+
+
+				<Button
+					onClick={() => {
+						console.log(Tone.Transport.state)
+						if (Tone.Transport.state === 'started') {
+							Tone.Transport.stop();
+						}
+						else {
+							startLoop();
+						}
+					}}
+					style={{ width: 'max-content', padding: '0px 5px 0px 5px' }}
+				>
+					play loop
+				</Button>
 
 
 			</Header>
@@ -232,22 +283,35 @@ export const Fretboard = ({
 
 					for (let i = 0; i < numFrets; i++) {
 						a.push(
-							<Fret key={'f' + (i + idx * numStrings)} 
-								onMouseEnter={() =>  {
-									if(isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
-										playTone(27.5 * Math.pow(2,Number(itm.octave)) * Math.pow(2,(i + NoteNumber[itm.note as NOTE]) / 12))}
+							<Fret key={i + idx * numFrets }
+								onMouseEnter={(e) => {
+									if (!e.shiftKey && isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
+										playTone(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))
 									}
 								}
-								onMouseDown={() =>  {
-									playTone(27.5 * Math.pow(2,Number(itm.octave)) * Math.pow(2,(i + NoteNumber[itm.note as NOTE]) / 12))}
+								}
+								onMouseDown={(e) => {
+									if (e.shiftKey) {
+										setNotesForLoop(prev => [...prev, 27.5 * (Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))]);
+										setSelectedFrets(prev => [...prev, i + idx * numFrets] );
+									}
+									else if (e.altKey) {
+										setSelectedFrets(prev => prev.filter((fret) => fret !== i + idx * numFrets));
+										
+									}
+									else {
+										playTone(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))
+									}
+								}
 								}
 								style={{
-								left: fretSize.width * i,
-								top: fretSize.height * idx,
-								width: fretSize.width,
-								height: fretSize.height,
-								background: isInMode(i, itm) ? fretOnColor : fretOffColor,
-							}}>
+									left: fretSize.width * i,
+									top: fretSize.height * idx,
+									width: fretSize.width,
+									height: fretSize.height,
+									background: selectedFrets.includes(i + idx * numFrets) ? 'red' :
+									 isInMode(i, itm) ? fretOnColor : fretOffColor,
+								}}>
 								{Notes[(i + NoteNumber[itm.note as NOTE]) % 12]}
 							</Fret>
 						)
@@ -263,7 +327,9 @@ export const Fretboard = ({
 										top: 5 + fretSize.height * numStrings,
 										width: fretSize.width,
 										height: fretSize.height,
-									}}>
+									}}
+									onClick={() => clickFretNumber(i)}
+								>
 									{i}
 								</FretNumber>)
 						}
@@ -289,7 +355,7 @@ const ToggleButton = styled.input((props) => {
 	return {
 		color: 'white',
 		background: 'black',
-		
+
 	}
 })
 const ToggleLabel = styled.span((props) => {
@@ -310,7 +376,7 @@ const Header = styled.div((props) => {
 		lineHeight: '50px',
 		display: 'flex',
 		alignContent: 'center',
-		gap: '0px 5px',
+		gap: '0px 2px',
 
 	}
 })
@@ -322,12 +388,12 @@ justify-content: center;
 align-content: center;
 padding: 2px;
 position: absolute;
-color: white;
+color: rgb(230,200,200);
 cursor: pointer;
 font-size: 20px;
 line-height: calc(70px / ${goldenRatio});
 vertical-align: middle;
-transition: filter 0.1s;
+transition: filter 0.2s;
 
 	&:hover {
 		filter: contrast(120%);		
@@ -344,17 +410,18 @@ justify-content: center;
 align-content: center;
 padding: 2px;
 position: absolute;
-color: white;
+color: rgb(230,200,200);
 font-size: 20px;
 line-height: 2em;
 vertical-align: middle;
 background: radial-gradient(ellipse at center, rgb(70,70,70), rgb(10,10,10));
+cursor: pointer;
 `
 
 // for string +/- and fret +/-
 const Button = styled.div`
 background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
-width: 40px;
+width: 50px;
 text-align: center;
 flex-direction: row;
 cursor: pointer;
@@ -404,7 +471,7 @@ text-align: center;
 position: absolute;
 color: rgb(230,200,200);
 left: -33px;
-width: 30px;
+width: calc(18px * ${goldenRatio});
 height: 18px;
 margin-bottom: 2px;
 cursor:pointer;
