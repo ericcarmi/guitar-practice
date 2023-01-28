@@ -47,6 +47,7 @@ export const Fretboard = ({
 	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard8');
 	const [fretOffColor, setFretOffColor] = useState('radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30))');
 	const [fretOnColor, setFretOnColor] = useState('radial-gradient(ellipse at center, rgb(0,0,190), rgb(30,30,30))');
+	const [fretSelectedColor, setFretSelectedColor] = useState('radial-gradient(ellipse at center, rgb(0,190,0), rgb(30,30,30))');
 
 	const [shouldOnlyPlayInMode, setShouldOnlyPlayInMode] = useState(true);
 
@@ -96,21 +97,23 @@ export const Fretboard = ({
 		Tone.Transport.start();
 	}
 
+	const [seq, setSeq] = useState(new Tone.Sequence);
+	const [BPM, setBPM] = useState(111);
+
+	useEffect(() => {
+		// this shouldn't change too fast
+		// Tone.Transport.bpm.value = BPM;
+		Tone.Transport.bpm.rampTo(BPM,0.1);
+	},[BPM, setBPM])
+
 	function startLoop() {
-		const seq = new Tone.Sequence((time, note) => {
+		 setSeq(new Tone.Sequence((time, note) => {
 			synth.triggerAttackRelease(note, 0.01, time);
 			// subdivisions are given as subarrays
-		}, notesForLoop).start(0);
-		Tone.Transport.bpm.value = 300;
+		// }, ['c4', 'e3', ['d3', 'a3'], 'b3']).start();
+		}, notesForLoop).start(0));
 		Tone.Transport.start();
 	}
-
-	// useEffect(() => {
-	// 	const timeout = setTimeout(() => {
-	// 		// clickFretNumber()
-	// 	},100);
-	// 	return () => clearTimeout(timeout);
-	// },[])
 
 	return (
 		<>
@@ -249,6 +252,7 @@ export const Fretboard = ({
 						console.log(Tone.Transport.state)
 						if (Tone.Transport.state === 'started') {
 							Tone.Transport.stop();
+							seq.stop();
 						}
 						else {
 							startLoop();
@@ -256,8 +260,12 @@ export const Fretboard = ({
 					}}
 					style={{ width: 'max-content', padding: '0px 5px 0px 5px' }}
 				>
-					play loop
+					{Tone.Transport.state === 'started' ? 'stop loop' : 'play loop'}
 				</Button>
+
+				<BPMSlider type='range' min='30' max='3000' value={BPM}
+					onChange={(e) => { setBPM(Number(e.target.value))}}
+					/>
 
 
 			</Header>
@@ -296,6 +304,7 @@ export const Fretboard = ({
 										setSelectedFrets(prev => [...prev, i + idx * numFrets] );
 									}
 									else if (e.altKey) {
+										setNotesForLoop(prev => prev.filter((num) => num !== 27.5 * (Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))));
 										setSelectedFrets(prev => prev.filter((fret) => fret !== i + idx * numFrets));
 										
 									}
@@ -309,7 +318,7 @@ export const Fretboard = ({
 									top: fretSize.height * idx,
 									width: fretSize.width,
 									height: fretSize.height,
-									background: selectedFrets.includes(i + idx * numFrets) ? 'red' :
+									background: selectedFrets.includes(i + idx * numFrets) ? fretSelectedColor :
 									 isInMode(i, itm) ? fretOnColor : fretOffColor,
 								}}>
 								{Notes[(i + NoteNumber[itm.note as NOTE]) % 12]}
@@ -342,7 +351,6 @@ export const Fretboard = ({
 		</>
 	);
 
-
 }
 
 const Template = styled.div((props) => {
@@ -361,6 +369,14 @@ const ToggleButton = styled.input((props) => {
 const ToggleLabel = styled.span((props) => {
 	return {
 		color: 'rgb(125,50,20)',
+	}
+})
+
+
+const BPMSlider = styled.input((props) => {
+	return {
+		background: 'red',
+		color: 'green',
 	}
 })
 
