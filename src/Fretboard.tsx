@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { Howl } from 'howler';
 import Tunings from './tunings.json';
 import {
 	goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings,
-	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE, MODE,
+	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE, MODE, synthType,
 } from './const';
+import { SketchPicker, PhotoshopPicker } from 'react-color';
 
 import * as Tone from 'tone'
 
+import { CircleOfFifths } from './CircleOfFifths';
 
 
 interface IFretboard {
@@ -16,7 +18,6 @@ interface IFretboard {
 }
 
 
-type synthType = Tone.Synth | Tone.FMSynth | Tone.AMSynth | Tone.PolySynth;
 
 export const Fretboard = ({
 	isMouseDown,
@@ -25,7 +26,6 @@ export const Fretboard = ({
 
 	const playTone = (freq: number) => {
 		synth.triggerAttackRelease(freq, "32n");
-
 	}
 
 	function getNextNote(x: string) {
@@ -57,6 +57,8 @@ export const Fretboard = ({
 	const [strings, setStrings] = useState<Array<GuitarString>>(Tunings[currentTuning])
 	const [numStrings, setNumStrings] = useState(Tunings[currentTuning].length);
 
+	const [showColorDropdown, setShowColorDropdown] = useState(false);
+
 
 	function getNotesFromMode() {
 		let x = [];
@@ -81,10 +83,14 @@ export const Fretboard = ({
 	}
 
 
+	function stringToFreq(itm: GuitarString, fret: number) {
+		return 27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (3 + fret + NoteNumber[itm.note as NOTE]) / 12)
+	}
+
 	function clickFretNumber(fret: number) {
 		let x: Array<number> = [];
 		strings.map((itm, idx) => {
-			x.push(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (fret + NoteNumber[itm.note as NOTE]) / 12));
+			x.push(stringToFreq(itm, fret));
 		})
 		const seq = new Tone.Sequence((time, note) => {
 			synth.triggerAttackRelease(note, 0.1, time);
@@ -95,6 +101,7 @@ export const Fretboard = ({
 		seq.stop(seq.now() + 2);
 
 		Tone.Transport.start();
+
 	}
 
 	const [seq, setSeq] = useState(new Tone.Sequence);
@@ -103,16 +110,26 @@ export const Fretboard = ({
 	useEffect(() => {
 		// this shouldn't change too fast
 		// Tone.Transport.bpm.value = BPM;
-		Tone.Transport.bpm.rampTo(BPM,0.1);
-	},[BPM, setBPM])
+		Tone.Transport.bpm.rampTo(BPM, 0.2);
+	}, [BPM, setBPM])
 
-	function startLoop() {
-		 setSeq(new Tone.Sequence((time, note) => {
+
+
+	function startLoop () {
+		setSeq(new Tone.Sequence((time, note) => {
 			synth.triggerAttackRelease(note, 0.01, time);
 			// subdivisions are given as subarrays
-		// }, ['c4', 'e3', ['d3', 'a3'], 'b3']).start();
+			// }, ['c4', 'e3', ['d3', 'a3'], 'b3']).start();
 		}, notesForLoop).start(0));
 		Tone.Transport.start();
+		
+	}
+
+	function updateLoop () {
+		setSeq(new Tone.Sequence((time, note) => {
+			synth.triggerAttackRelease(note, 0.01, time);
+		}, notesForLoop).start(0));
+		
 	}
 
 	return (
@@ -263,15 +280,43 @@ export const Fretboard = ({
 					{Tone.Transport.state === 'started' ? 'stop loop' : 'play loop'}
 				</Button>
 
-				<BPMSlider type='range' min='30' max='3000' value={BPM}
-					onChange={(e) => { setBPM(Number(e.target.value))}}
-					/>
+				<BPMSlider type='range' min='30' max='300' value={BPM}
+					onChange={(e) => { setBPM(Number(e.target.value)) }}
+				/>
+
+
+
+				{/*
+				<Dropdown
+					onClick={() => setShowColorDropdown(prev => !prev)}
+					onChange={(e) => {
+
+					}}
+				>
+					<option hidden key={'edit colors'}>{'edit colors'}</option>
+					{Object(['fret off color', 'fret on color', 'fret number color', 'button color']).map((itm: any) => {
+						return <option key={itm}>{itm}</option>
+					})}
+
+				</Dropdown> 
+				*/}
+
+				{showColorDropdown && 
+					<div style={{position: 'relative', zIndex: 3}}> 
+					<PhotoshopPicker 
+						color={fretOffColor}
+						onAccept={(e) => {setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`); setShowColorDropdown(false)}}
+						onChangeComplete={(e) => setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`)}
+						
+						/> 
+					</div>}
+
 
 
 			</Header>
 
 
-			<div style={{ position: 'absolute', top: '10%', left: '4%' }}>
+			<div style={{ position: 'absolute', top: '10%', left: '4%', zIndex: 0 }}>
 				{strings.map((itm, idx) => {
 					let a: any = []
 					a.push(<div key={'t' + idx}>
@@ -291,25 +336,27 @@ export const Fretboard = ({
 
 					for (let i = 0; i < numFrets; i++) {
 						a.push(
-							<Fret key={i + idx * numFrets }
+							<Fret key={i + idx * numFrets}
 								onMouseEnter={(e) => {
 									if (!e.shiftKey && isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
-										playTone(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))
+										playTone(stringToFreq(itm, i))
 									}
 								}
 								}
 								onMouseDown={(e) => {
 									if (e.shiftKey) {
-										setNotesForLoop(prev => [...prev, 27.5 * (Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))]);
-										setSelectedFrets(prev => [...prev, i + idx * numFrets] );
+										setNotesForLoop(prev => [...prev, stringToFreq(itm, i)]);
+										setSelectedFrets(prev => [...prev, i + idx * numFrets]);
+										updateLoop();
 									}
 									else if (e.altKey) {
-										setNotesForLoop(prev => prev.filter((num) => num !== 27.5 * (Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))));
+										setNotesForLoop(prev => prev.filter((num) => num !== stringToFreq(itm, i)));
 										setSelectedFrets(prev => prev.filter((fret) => fret !== i + idx * numFrets));
-										
+										updateLoop();
+
 									}
 									else {
-										playTone(27.5 * Math.pow(2, Number(itm.octave)) * Math.pow(2, (i + NoteNumber[itm.note as NOTE]) / 12))
+										playTone(stringToFreq(itm, i))
 									}
 								}
 								}
@@ -319,7 +366,7 @@ export const Fretboard = ({
 									width: fretSize.width,
 									height: fretSize.height,
 									background: selectedFrets.includes(i + idx * numFrets) ? fretSelectedColor :
-									 isInMode(i, itm) ? fretOnColor : fretOffColor,
+										isInMode(i, itm) ? fretOnColor : fretOffColor,
 								}}>
 								{Notes[(i + NoteNumber[itm.note as NOTE]) % 12]}
 							</Fret>
@@ -347,10 +394,15 @@ export const Fretboard = ({
 					return a;
 
 				})}
+
+				<CircleOfFifths
+					currentMode={currentMode}
+					currentRoot={currentRoot}
+					synth={synth}
+					/>
 			</div>
 		</>
 	);
-
 }
 
 const Template = styled.div((props) => {
@@ -393,6 +445,7 @@ const Header = styled.div((props) => {
 		display: 'flex',
 		alignContent: 'center',
 		gap: '0px 2px',
+		zIndex: 2,
 
 	}
 })

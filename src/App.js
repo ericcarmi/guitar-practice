@@ -1,6 +1,6 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState} from 'react';
 import {Fretboard} from './Fretboard';
-import useScript from './hooks/useScript';
+// import useScript from './hooks/useScript';
 
 import * as Tone from 'tone'
 
@@ -16,14 +16,13 @@ function App() {
     <div 
       style={{
         userSelect: 'none', 
-        background:'black', 
+        background:'rgb(21,15,17)', 
         width: '100%',
         height: '100%', 
-        position: 'absolute'
+        position: 'absolute',
       }}
       onMouseDown={() => {Tone.start(); setIsMouseDown(true)}}
       onMouseUp={() => setIsMouseDown(false)}
-    
       >
     <Fretboard
       isMouseDown={isMouseDown}
