@@ -7,7 +7,6 @@ function relativeArc(section: number, theta: number, radius: number) {
 	const z = [];
 	const slice = 1 / (1 + section);
 	theta += Math.PI / 12;
-	const shift = 0.1;
 
 	for (let i = 0; i <= numsteps; i++) {
 		z.push([Math.cos(Math.PI * 2 * i / numsteps * slice), Math.sin(Math.PI * 2 * i / numsteps * slice)])
@@ -31,12 +30,14 @@ function relativeArc(section: number, theta: number, radius: number) {
 }
 
 interface ICircleOfFifths {
+	isMouseDown: boolean;
 	currentRoot: string;
 	currentMode: string;
 	synth: synthType;
 }
 
 export const CircleOfFifths = ({
+	isMouseDown,
 	currentMode,
 	currentRoot,
 	synth,
@@ -73,7 +74,12 @@ export const CircleOfFifths = ({
 						left={0 + shift * Math.cos(t + Math.PI / 12 * 2 * i)}
 						top={0 + shift * Math.sin(t + Math.PI / 12 * 2 * i)}
 						color={'radial-gradient(ellipse at center, rgb(100,100,100), rgb(40,40,40))'}
-						onClick={() => playTone(Notes[(4 + idx + i*7) % 12], '4')}
+						onMouseDown={() => playTone(Notes[(4 + idx + i*7) % 12], '4')}
+						onMouseEnter={() => {
+							if(isMouseDown){
+								playTone(Notes[(4 + idx + i*7) % 12], '4')
+							}
+						}}
 					/>
 					<Label
 						left={`calc(150px + ${rad * Math.cos(x)}px - 1em * ${Math.abs(Math.cos(x/2))} )`}
@@ -110,7 +116,12 @@ export const CircleOfFifths = ({
 				left={60 + shift * Math.cos(t + Math.PI / 12 * 2 * i)}
 				top={60 + shift * Math.sin(t + Math.PI / 12 * 2 * i)}
 				color={'radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40))'}
-				onClick={() => playTone(Notes[(idx + i*7 + 7) % 12], '3')}
+				onMouseDown={() => playTone(Notes[(idx + i*7 + 7) % 12], '3')}
+				onMouseEnter={() => {
+					if(isMouseDown){
+						playTone(Notes[(4 + idx + i*7) % 12], '4')
+					}
+				}}
 			/>
 					<Label
 						left={`calc(150px + ${rad * Math.cos(x)}px - 1em * ${Math.abs(Math.cos(x/2))} )`}

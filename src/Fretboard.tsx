@@ -5,6 +5,7 @@ import Tunings from './tunings.json';
 import {
 	goldenRatio, Groups, Notes, NoteNumber, maxNumberOfStrings, minNumberOfStrings,
 	maxNumberOfFrets, minNumberOfFrets, allModes, GuitarString, NOTE, MODE, synthType,
+	Ternary,
 } from './const';
 import { SketchPicker, PhotoshopPicker } from 'react-color';
 
@@ -44,6 +45,7 @@ export const Fretboard = ({
 	const [currentGroup, setCurrentGroup] = useState<keyof typeof Groups>('western 7');
 	const [currentMode, setCurrentMode] = useState<MODE>('lydian' as MODE);
 	const [currentRoot, setCurrentRoot] = useState<NOTE>('e');
+	const [shouldUseNumbers, setShouldUseNumbers] = useState<Ternary>(false);
 	const [currentTuning, setCurrentTuning] = useState<keyof typeof Tunings>('standard8');
 	const [fretOffColor, setFretOffColor] = useState('radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30))');
 	const [fretOnColor, setFretOnColor] = useState('radial-gradient(ellipse at center, rgb(0,0,190), rgb(30,30,30))');
@@ -58,6 +60,11 @@ export const Fretboard = ({
 	const [numStrings, setNumStrings] = useState(Tunings[currentTuning].length);
 
 	const [showColorDropdown, setShowColorDropdown] = useState(false);
+
+
+	const [seq, setSeq] = useState(new Tone.Sequence);
+	const [BPM, setBPM] = useState(111);
+
 
 
 	function getNotesFromMode() {
@@ -98,14 +105,10 @@ export const Fretboard = ({
 		}, x);
 
 		seq.start(seq.now() + 0);
-		seq.stop(seq.now() + 2);
 
 		Tone.Transport.start();
 
 	}
-
-	const [seq, setSeq] = useState(new Tone.Sequence);
-	const [BPM, setBPM] = useState(111);
 
 	useEffect(() => {
 		// this shouldn't change too fast
@@ -196,6 +199,18 @@ export const Fretboard = ({
 					}}
 				>
 					{Notes.map((itm: any) => {
+						return <option key={itm}>{itm}</option>
+					})}
+
+				</Dropdown>
+
+				<Dropdown
+					value={shouldUseNumbers === false ? 'num' : shouldUseNumbers === undefined ? 'a/#' : 'abc'}
+					onChange={(e) => {
+						setShouldUseNumbers(prev => e.target.value === 'a/#' ? undefined : !prev)
+					}}
+				>
+					{(['abc','num', 'a/#']).map((itm: any) => {
 						return <option key={itm}>{itm}</option>
 					})}
 
@@ -368,7 +383,11 @@ export const Fretboard = ({
 									background: selectedFrets.includes(i + idx * numFrets) ? fretSelectedColor :
 										isInMode(i, itm) ? fretOnColor : fretOffColor,
 								}}>
-								{Notes[(i + NoteNumber[itm.note as NOTE]) % 12]}
+								{shouldUseNumbers ? Notes[(i + NoteNumber[itm.note as NOTE]) % 12] 
+									: shouldUseNumbers === false ? (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12
+									: Notes[(i + NoteNumber[itm.note as NOTE]) % 12] 
+										+ " " + (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12							
+								}
 							</Fret>
 						)
 
@@ -396,6 +415,7 @@ export const Fretboard = ({
 				})}
 
 				<CircleOfFifths
+					isMouseDown={isMouseDown}
 					currentMode={currentMode}
 					currentRoot={currentRoot}
 					synth={synth}
@@ -458,6 +478,7 @@ align-content: center;
 padding: 2px;
 position: absolute;
 color: rgb(230,200,200);
+text-transform: uppercase;
 cursor: pointer;
 font-size: 20px;
 line-height: calc(70px / ${goldenRatio});

@@ -13,6 +13,7 @@ export type NOTE = keyof typeof NoteNumber;
 export type MODE = keyof Object;
 export type GuitarString = { note: string, position: number, octave: string };
 export type synthType = Synth | FMSynth | AMSynth | PolySynth;
+export type Ternary = boolean | undefined;
 
 
 export const Groups = {

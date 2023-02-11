@@ -45,5 +45,15 @@
 		{"note": "g", "octave": "2", "position": 5},
 		{"note": "c", "octave": "2", "position": 6},
 		{"note": "g", "octave": "1", "position": 7}
+	],
+	"8dad" : [
+		{"note": "d", "octave": "4", "position": 0},
+		{"note": "b", "octave": "3", "position": 1},
+		{"note": "g", "octave": "3", "position": 2},
+		{"note": "d", "octave": "3", "position": 3},
+		{"note": "a", "octave": "2", "position": 4},
+		{"note": "d", "octave": "2", "position": 5},
+		{"note": "a", "octave": "1", "position": 6},
+		{"note": "d", "octave": "1", "position": 7}
 	]
 }
