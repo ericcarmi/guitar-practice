@@ -26,6 +26,9 @@ export const Groups = {
 		phyrgian : [0, 1, 3, 5, 7, 8, 10],
 		locrian : [0, 1, 3, 4, 7, 8, 10],
 	},
+	'harmonic minor' : {
+		hminor : [0, 2, 3, 5, 7, 8, 11]
+	},
 	'diminished' : {
 		a : [0, 1, 3, 4, 6, 7, 9, 10], 
 		b : [0, 2, 3, 5, 6, 8, 9, 11]
@@ -48,6 +51,7 @@ export type allModes =
 	|	"aeolian"
 	|	"phyrgian"
 	|	"locrian"
+  | "hminor"
 	|	"a"
 	|	"b";
 

@@ -16,6 +16,15 @@
 		{"note": "e", "octave": "2", "position": 5},
 		{"note": "b", "octave": "1", "position": 6}
 	],
+	"7-Dstd-drpG" : [
+		{"note": "d", "octave": "4", "position": 0},
+		{"note": "a", "octave": "3", "position": 1},
+		{"note": "f", "octave": "3", "position": 2},
+		{"note": "c", "octave": "3", "position": 3},
+		{"note": "g", "octave": "2", "position": 4},
+		{"note": "d", "octave": "2", "position": 5},
+		{"note": "g", "octave": "1", "position": 6}
+	],
 	"standard8" : [
 		{"note": "e", "octave": "4", "position": 0},
 		{"note": "b", "octave": "3", "position": 1},

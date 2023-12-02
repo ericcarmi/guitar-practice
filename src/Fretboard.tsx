@@ -11,7 +11,7 @@ import { SketchPicker, PhotoshopPicker } from 'react-color';
 
 import * as Tone from 'tone'
 
-import { CircleOfFifths } from './CircleOfFifths';
+import { CircleOfFifths, CFSIZE } from './CircleOfFifths';
 
 
 interface IFretboard {
@@ -118,21 +118,21 @@ export const Fretboard = ({
 
 
 
-	function startLoop () {
+	function startLoop() {
 		setSeq(new Tone.Sequence((time, note) => {
 			synth.triggerAttackRelease(note, 0.01, time);
 			// subdivisions are given as subarrays
 			// }, ['c4', 'e3', ['d3', 'a3'], 'b3']).start();
 		}, notesForLoop).start(0));
 		Tone.Transport.start();
-		
+
 	}
 
-	function updateLoop () {
+	function updateLoop() {
 		setSeq(new Tone.Sequence((time, note) => {
 			synth.triggerAttackRelease(note, 0.01, time);
 		}, notesForLoop).start(0));
-		
+
 	}
 
 	return (
@@ -210,7 +210,7 @@ export const Fretboard = ({
 						setShouldUseNumbers(prev => e.target.value === 'a/#' ? undefined : !prev)
 					}}
 				>
-					{(['abc','num', 'a/#']).map((itm: any) => {
+					{(['abc', 'num', 'a/#']).map((itm: any) => {
 						return <option key={itm}>{itm}</option>
 					})}
 
@@ -316,14 +316,14 @@ export const Fretboard = ({
 				</Dropdown> 
 				*/}
 
-				{showColorDropdown && 
-					<div style={{position: 'relative', zIndex: 3}}> 
-					<PhotoshopPicker 
-						color={fretOffColor}
-						onAccept={(e) => {setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`); setShowColorDropdown(false)}}
-						onChangeComplete={(e) => setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`)}
-						
-						/> 
+				{showColorDropdown &&
+					<div style={{ position: 'relative', zIndex: 3 }}>
+						<PhotoshopPicker
+							color={fretOffColor}
+							onAccept={(e) => { setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`); setShowColorDropdown(false) }}
+							onChangeComplete={(e) => setFretOffColor(`radial-gradient(ellipse at center, ${e.hex}, rgb(30,30,30))`)}
+
+						/>
 					</div>}
 
 
@@ -331,95 +331,102 @@ export const Fretboard = ({
 			</Header>
 
 
-			<div style={{ position: 'absolute', top: '10%', left: '4%', zIndex: 0 }}>
-				{strings.map((itm, idx) => {
-					let a: any = []
-					a.push(<div key={'t' + idx}>
-						<TuneDownButton key={'t1' + idx} style={{ top: fretSize.height * idx + 22 }}
-							onClick={() => {
-								setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getPrevNote(itm.note), position: itm.position, octave: itm.octave }))
-							}}
-						>-</TuneDownButton>
-						<TuneUpButton key={'t2' + idx} style={{ top: fretSize.height * idx + 2 }}
-							onClick={() => {
-								setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getNextNote(itm.note), position: itm.position, octave: itm.octave }))
-							}}
-						>+</TuneUpButton>
-					</div>
-
-					)
-
-					for (let i = 0; i < numFrets; i++) {
+			<div style={{ position: 'relative', top: '10%', display: 'flex', justifyContent: 'center' }}>
+				<div
+					style={{position: 'absolute', left: '5%'}}
+				>
+					{strings.map((itm, idx) => {
+						let a: any = []
 						a.push(
-							<Fret key={i + idx * numFrets}
-								onMouseEnter={(e) => {
-									if (!e.shiftKey && isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
-										playTone(stringToFreq(itm, i))
-									}
-								}
-								}
-								onMouseDown={(e) => {
-									if (e.shiftKey) {
-										setNotesForLoop(prev => [...prev, stringToFreq(itm, i)]);
-										setSelectedFrets(prev => [...prev, i + idx * numFrets]);
-										updateLoop();
-									}
-									else if (e.altKey) {
-										setNotesForLoop(prev => prev.filter((num) => num !== stringToFreq(itm, i)));
-										setSelectedFrets(prev => prev.filter((fret) => fret !== i + idx * numFrets));
-										updateLoop();
+							<div key={'t' + idx}>
+								<span style={{zIndex: 3, position: 'absolute', top: fretSize.height * idx + fretSize.height / 4, left: -10, fontSize: '15px', color: 'white'}}>{itm.note}</span>
+								<TuneDownButton key={'t1' + idx} style={{ top: fretSize.height * idx + 22 }}
+									onClick={() => {
+										setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getPrevNote(itm.note), position: itm.position, octave: itm.octave }))
+									}}
+								>-</TuneDownButton>
+								<TuneUpButton key={'t2' + idx} style={{ top: fretSize.height * idx + 2 }}
+									onClick={() => {
+										setStrings((prev) => prev.map((i) => i !== itm ? i : { note: getNextNote(itm.note), position: itm.position, octave: itm.octave }))
+									}}
+								>+</TuneUpButton>
+							</div>
 
-									}
-									else {
-										playTone(stringToFreq(itm, i))
-									}
-								}
-								}
-								style={{
-									left: fretSize.width * i,
-									top: fretSize.height * idx,
-									width: fretSize.width,
-									height: fretSize.height,
-									background: selectedFrets.includes(i + idx * numFrets) ? fretSelectedColor :
-										isInMode(i, itm) ? fretOnColor : fretOffColor,
-								}}>
-								{shouldUseNumbers ? Notes[(i + NoteNumber[itm.note as NOTE]) % 12] 
-									: shouldUseNumbers === false ? (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12
-									: Notes[(i + NoteNumber[itm.note as NOTE]) % 12] 
-										+ " " + (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12							
-								}
-							</Fret>
 						)
 
-
-					}
-					if (idx === numStrings - 1) {
 						for (let i = 0; i < numFrets; i++) {
 							a.push(
-								<FretNumber key={'n' + i + numStrings}
+								<Fret key={i + idx * numFrets}
+									onMouseEnter={(e) => {
+										if (!e.shiftKey && isMouseDown && shouldOnlyPlayInMode && isInMode(i, itm)) {
+											playTone(stringToFreq(itm, i))
+										}
+									}
+									}
+									onMouseDown={(e) => {
+										if (e.shiftKey) {
+											setNotesForLoop(prev => [...prev, stringToFreq(itm, i)]);
+											setSelectedFrets(prev => [...prev, i + idx * numFrets]);
+											updateLoop();
+										}
+										else if (e.altKey) {
+											setNotesForLoop(prev => prev.filter((num) => num !== stringToFreq(itm, i)));
+											setSelectedFrets(prev => prev.filter((fret) => fret !== i + idx * numFrets));
+											updateLoop();
+
+										}
+										else {
+											playTone(stringToFreq(itm, i))
+										}
+									}
+									}
 									style={{
 										left: fretSize.width * i,
-										top: 5 + fretSize.height * numStrings,
+										top: fretSize.height * idx,
 										width: fretSize.width,
 										height: fretSize.height,
-									}}
-									onClick={() => clickFretNumber(i)}
-								>
-									{i}
-								</FretNumber>)
+										background: selectedFrets.includes(i + idx * numFrets) ? fretSelectedColor :
+											isInMode(i, itm) ? fretOnColor : fretOffColor,
+									}}>
+									{shouldUseNumbers ? Notes[(i + NoteNumber[itm.note as NOTE]) % 12]
+										: shouldUseNumbers === false ? (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12
+											: Notes[(i + NoteNumber[itm.note as NOTE]) % 12]
+											+ " " + (i + NoteNumber[itm.note as NOTE] - NoteNumber[currentRoot] + 12) % 12
+									}
+								</Fret>
+							)
+
+
 						}
-					}
+						if (idx === numStrings - 1) {
+							for (let i = 0; i < numFrets; i++) {
+								a.push(
+									<FretNumber key={'n' + i + numStrings}
+										style={{
+											left: fretSize.width * i,
+											top: 5 + fretSize.height * numStrings,
+											width: fretSize.width,
+											height: fretSize.height,
+										}}
+										onClick={() => clickFretNumber(i)}
+									>
+										{i}
+									</FretNumber>)
+							}
+						}
 
-					return a;
+						return a;
 
-				})}
+					})}
+
+				</div>
 
 				<CircleOfFifths
 					isMouseDown={isMouseDown}
 					currentMode={currentMode}
 					currentRoot={currentRoot}
 					synth={synth}
-					/>
+				/>
 			</div>
 		</>
 	);
@@ -536,7 +543,7 @@ background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
 color: black;
 text-align: center;
 position: absolute;
-left: -33px;
+left: -43px;
 color: rgb(230,200,200);
 width: 30px;
 height: 18px;
@@ -560,8 +567,8 @@ color: black;
 text-align: center;
 position: absolute;
 color: rgb(230,200,200);
-left: -33px;
-width: calc(18px * ${goldenRatio});
+left: -43px;
+width: 30px;
 height: 18px;
 margin-bottom: 2px;
 cursor:pointer;
