@@ -465,7 +465,7 @@ const Header = styled.div((props) => {
 		position: 'absolute',
 		width: '100%',
 		height: 50,
-		background: 'radial-gradient(ellipse at center, rgb(100,100,100), rgb(170,170,170))',
+		background: 'rgb(170,170,170)',
 		textAlign: 'center',
 		verticalAlign: 'center',
 		lineHeight: '50px',
@@ -511,13 +511,13 @@ color: rgb(230,200,200);
 font-size: 20px;
 line-height: 2em;
 vertical-align: middle;
-background: radial-gradient(ellipse at center, rgb(70,70,70), rgb(10,10,10));
+background: rgb(70,70,70);
 cursor: pointer;
 `
 
 // for string +/- and fret +/-
 const Button = styled.div`
-background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
+background: rgb(0,100,0);
 width: 50px;
 text-align: center;
 flex-direction: row;
@@ -539,7 +539,7 @@ color: rgb(230,200,200);
 `
 
 const TuneDownButton = styled.div`
-background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
+background: rgb(0,100,0);
 color: black;
 text-align: center;
 position: absolute;
@@ -562,7 +562,7 @@ transition: filter 0.2s;
 `
 
 const TuneUpButton = styled.div`
-background: radial-gradient(ellipse at center, rgb(0,100,0), rgb(40,40,40));
+background: rgb(0,100,0);
 color: black;
 text-align: center;
 position: absolute;
@@ -586,7 +586,7 @@ transition: filter 0.2s;
 `
 
 const Dropdown = styled.select`
-background: radial-gradient(ellipse at center, rgb(90,90,90), rgb(30,30,30));
+background: rgb(30,30,30);
 text-align: center;
 justify-content: center;
 align-content: center;
